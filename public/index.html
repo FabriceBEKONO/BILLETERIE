@@ -1,0 +1,15 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Billetterie</title><link rel="stylesheet" href="s.css">
+<main><h1 id="n"></h1><p id="d"></p>
+<form id="f"><label>Nom complet<input name="name" required></label><label>Téléphone<input name="phone" type="tel" required></label>
+<label>Billet<select name="category" id="c"></select></label><label>Nombre de billets<input name="qty" type="number" min="1" value="1"></label>
+<p id="t"></p><button>Réserver</button></form><section id="r" hidden></section></main>
+<script>
+const $=i=>document.getElementById(i),F=$("f");let E;
+const tot=()=>{const c=E.categories.find(x=>x.id==F.category.value);$("t").textContent="Total : "+c.price*F.qty.value+" FCFA"};
+fetch("/api/info").then(r=>r.json()).then(e=>{E=e;$("n").textContent=e.name;$("d").textContent=e.date+" – "+e.place;
+$("c").innerHTML=e.categories.map(c=>`<option value="${c.id}">${c.label} – ${c.price} FCFA</option>`).join("");F.qty.max=e.maxPerOrder;tot()});
+F.oninput=tot;
+F.onsubmit=async e=>{e.preventDefault();const r=await fetch("/api/order",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(F)))}),d=await r.json();
+if(!r.ok)return alert(d.error);const m=E.momo,u="ticket.html?o="+d.id;F.hidden=true;$("r").hidden=false;
+$("r").innerHTML=`<h2>Réservation enregistrée</h2><p>Envoyez <b>${d.total} FCFA</b> par Mobile Money à ${m.holder} : MTN ${m.mtn} ou Orange ${m.orange}. Indiquez la référence <b>${d.ref}</b> dans le message.</p><p>Vos billets s'afficheront sur cette page après vérification du paiement : <a href="${u}">${location.origin}/${u}</a><br>Gardez ce lien.</p>`};
+</script>

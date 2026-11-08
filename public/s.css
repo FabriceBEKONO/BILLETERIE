@@ -1,0 +1,8 @@
+body{font:16px/1.5 system-ui,sans-serif;margin:0;color:#1a1a1a}
+main{max-width:34rem;margin:0 auto;padding:1.5rem 1rem}
+label{display:block;margin:.8rem 0}
+input,select,button{font:inherit;padding:.6rem;width:100%;box-sizing:border-box;margin-top:.25rem}
+button{background:#1f4fb8;color:#fff;border:0;border-radius:6px;cursor:pointer}
+.tk{border:1px solid #bbb;border-radius:6px;padding:.8rem;margin:.8rem 0}
+.res{padding:1.2rem;margin-top:1rem;border-radius:8px;font-size:1.2rem;background:#eee}
+.ok{background:#bfe8c8}.ko{background:#f5b9b9}

@@ -1,0 +1,14 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Commandes</title><link rel="stylesheet" href="s.css">
+<main><h1>Commandes</h1><label>Clé admin<input id="k" type="password"></label><button id="g">Actualiser</button><div id="l"></div></main>
+<script>
+const $=i=>document.getElementById(i),k=$("k");k.value=sessionStorage.k||"";
+const api=(p,b)=>fetch(p,{method:b?"POST":"GET",headers:{"x-key":k.value},body:b&&JSON.stringify(b)});
+async function load(){sessionStorage.k=k.value;const r=await api("/api/orders"),l=$("l");if(!r.ok)return l.textContent="Clé refusée";l.textContent="";
+(await r.json()).forEach(o=>{const d=document.createElement("div");d.className="tk";
+d.textContent=`${o.ref} – ${o.name} – ${o.phone} – ${o.qty} x ${o.label} = ${o.total} FCFA – ${o.status}`;
+if(o.status==="pending")["confirm","reject"].forEach(a=>{const b=document.createElement("button");b.textContent=a==="confirm"?"Paiement reçu":"Refuser";
+b.onclick=async()=>{b.disabled=true;await api("/api/confirm",{id:o.id,action:a});load()};d.append(b)});
+if(o.status==="paid"){const a=document.createElement("a");a.href="ticket.html?o="+o.id;a.textContent=" Voir les billets";d.append(a)}
+l.append(d)})}
+$("g").onclick=load;if(k.value)load();
+</script>
