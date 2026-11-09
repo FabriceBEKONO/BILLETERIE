@@ -11,5 +11,5 @@ $("c").innerHTML=e.categories.map(c=>`<option value="${c.id}">${c.label} – ${c
 F.oninput=tot;
 F.onsubmit=async e=>{e.preventDefault();const r=await fetch("/api/order",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(F)))}),d=await r.json();
 if(!r.ok)return alert(d.error);const m=E.momo,u="ticket.html?o="+d.id;F.hidden=true;$("r").hidden=false;
-$("r").innerHTML=`<h2>Réservation enregistrée</h2><p>Envoyez <b>${d.total} FCFA</b> par Mobile Money à ${m.holder} : MTN ${m.mtn} ou Orange ${m.orange}. Indiquez la référence <b>${d.ref}</b> dans le message.</p><p>Vos billets s'afficheront sur cette page après vérification du paiement : <a href="${u}">${location.origin}/${u}</a><br>Gardez ce lien.</p>`};
+$("r").innerHTML=`<h2>Réservation enregistrée</h2><p>Envoyez <b>${d.total} FCFA</b> par Mobile Money à ${m.holder} : MTN (MOMO) : ${m.mtn} ou Orange (OM) : ${m.orange}. Indiquez la référence <b>${d.ref}</b> dans le message.</p><p>Vos billets s'afficheront sur cette page après vérification du paiement : <a href="${u}">${location.origin}/${u}</a><br>Gardez ce lien.</p>`};
 </script>
