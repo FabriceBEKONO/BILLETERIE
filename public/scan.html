@@ -1,11 +1,35 @@
 <!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contrôle d'entrée</title><link rel="stylesheet" href="s.css">
 <script src="html5-qrcode.min.js"></script>
-<main><h1>Contrôle d'entrée</h1><label>Clé scan<input id="k" type="password"></label><button id="s">Démarrer la caméra</button><div id="reader"></div><div id="res" class="res">En attente</div></main>
+<main><h1>Contrôle d'entrée</h1><label>Clé scan<input id="k" type="password"></label><button id="s">Démarrer la caméra</button><div id="reader"></div><div id="res" class="res">En attente</div>
+<label>Saisie manuelle du code<input id="m" autocomplete="off" placeholder="16 caractères sous le QR"></label><button id="v">Vérifier ce code</button></main>
 <script>
-const $=i=>document.getElementById(i);let busy=false;$("k").value=sessionStorage.k||"";
-$("s").onclick=()=>{sessionStorage.k=$("k").value;new Html5Qrcode("reader").start({facingMode:"environment"},{fps:10,qrbox:250},async t=>{
-if(busy)return;busy=true;const r=await fetch("/api/scan",{method:"POST",headers:{"x-key":$("k").value},body:JSON.stringify({code:t})}),d=await r.json(),e=$("res");
-e.className="res "+(d.ok?"ok":"ko");
-e.textContent=r.status===401?"Clé refusée":d.ok?"VALIDE : "+d.name+" ("+d.label+")":"REFUSÉ : "+d.reason+(d.name?" – "+d.name:"")+(d.at?" à "+new Date(d.at).toLocaleTimeString("fr-FR"):"");
-setTimeout(()=>busy=false,2500)}).catch(x=>$("res").textContent="Caméra impossible : "+x)};
+const $=i=>document.getElementById(i);let busy=false,key="",qr=null;$("k").value=sessionStorage.k||"";
+const show=(cls,txt)=>{const e=$("res");e.className="res "+cls;e.textContent=txt};
+const call=code=>fetch("/api/scan",{method:"POST",headers:{"x-key":key,"content-type":"application/json"},body:JSON.stringify({code})});
+async function check(raw){
+  if(busy)return;busy=true;
+  try{
+    const code=String(raw||"").trim().toLowerCase().split(/[^a-f0-9]+/).find(x=>x.length===16)||String(raw||"").trim();
+    const r=await call(code);
+    if(r.status===401){show("ko","Clé refusée");return}
+    const d=await r.json();
+    show(d.ok?"ok":"ko",d.ok?"VALIDE : "+d.name+" ("+d.label+")":"REFUSÉ : "+d.reason+(d.name?" – "+d.name:"")+(d.at?" à "+new Date(d.at).toLocaleTimeString("fr-FR"):""));
+  }catch(x){show("ko","Erreur réseau, réessayez")}
+  finally{setTimeout(()=>busy=false,2500)}
+}
+async function login(){
+  key=$("k").value.trim();if(!key){show("ko","Entrez la clé scan");return false}
+  try{const r=await call("");if(r.status===401){key="";show("ko","Clé refusée");return false}}
+  catch(x){show("ko","Erreur réseau, réessayez");return false}
+  sessionStorage.k=key;return true;
+}
+$("s").onclick=async()=>{
+  if(!await login())return;
+  if(qr){try{await qr.stop()}catch(x){}}
+  qr=qr||new Html5Qrcode("reader",{formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE],verbose:false});
+  show("","Clé acceptée – visez un QR code");
+  qr.start({facingMode:"environment"},{fps:10,qrbox:(w,h)=>{const s=Math.floor(Math.min(w,h)*0.8);return{width:s,height:s}}},t=>check(t),()=>{})
+    .catch(x=>show("ko","Caméra impossible : "+x));
+};
+$("v").onclick=async()=>{if(await login())check($("m").value)};
 </script>

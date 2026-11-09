@@ -29,7 +29,7 @@ export default async (req) => {
     return J(ord);
   }
   if (p === "/api/scan" && scan && req.method === "POST") {
-    const { code } = await req.json(), c = String(code);
+    const { code } = await req.json().catch(() => ({})), c = String(code ?? "").trim().toLowerCase();
     const tk = /^[a-f0-9]{16}$/.test(c) ? await t.get(c, { type: "json" }) : null;
     if (!tk) return J({ ok: false, reason: "Billet inconnu" });
     const r = await used.set(c, String(Date.now()), { onlyIfNew: true });

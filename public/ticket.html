@@ -1,5 +1,5 @@
 <!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mes billets</title><link rel="stylesheet" href="s.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="qrcode.js"></script>
 <main><h1>Mes billets</h1><div id="o">Chargement…</div></main>
 <script>
 const o=document.getElementById("o");
@@ -7,5 +7,5 @@ fetch("/api/ticket?o="+new URLSearchParams(location.search).get("o")).then(async
 if(!ok)return o.textContent=d.error;const x=d.order;
 if(x.status!=="paid")return o.textContent="Référence "+x.ref+" : "+(x.status==="rejected"?"paiement refusé, contactez l'organisateur.":"paiement en cours de vérification. Actualisez cette page plus tard.");
 o.textContent=x.name+" – "+x.label;
-x.codes.forEach((c,i)=>{const b=document.createElement("div");b.className="tk";const p=document.createElement("p");p.textContent="Billet "+(i+1)+" sur "+x.codes.length;const q=document.createElement("div");b.append(p,q);o.append(b);new QRCode(q,{text:c,width:200,height:200})})});
+x.codes.forEach((c,i)=>{const b=document.createElement("div");b.className="tk";const p=document.createElement("p");p.textContent="Billet "+(i+1)+" sur "+x.codes.length;const q=document.createElement("div");b.append(p,q);o.append(b);const g=qrcode(0,"M");g.addData(c);g.make();const im=new Image();im.src=g.createDataURL(8,4);im.alt="QR "+c;im.style.cssText="display:block;width:240px;max-width:100%;height:auto;background:#fff;image-rendering:pixelated";const cd=document.createElement("p");cd.textContent="Code : "+c;q.append(im,cd)})});
 </script>
